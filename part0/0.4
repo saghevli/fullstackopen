@@ -1,4 +1,10 @@
-browser->server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/notes
+browser->server: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note
+note over server:
+server parses response, adds list item to json
+responds with 302 redirect to same page (refresh)
+end note
+server-->browser: HTML-code (302, refresh)
+browser->server: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note
 server-->browser: HTML-code
 browser->server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/main.css
 server-->browser: main.css
@@ -11,9 +17,10 @@ that requests JSON data from server
 end note
 
 browser->server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/data.json
-server-->browser: [{ content: "HTML is easy", date: "2019-05-23" }, ...]
+server-->browser: data.json (with new note)
 
 note over browser:
 browser executes the event handler
-that renders notes to display
+that renders notes to display,
+including new note item
 end note
