@@ -2,6 +2,31 @@ import React from 'react';
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 
+const ResultCountry = ({country, index}) => {
+  const [show, setShow] = useState([])
+
+  const showAndHide = (index) => {
+    const newShow = [...show]
+    newShow[index] = !show[index]
+    setShow(newShow)
+  }
+
+  const resultTitle = (
+    <p key={country.numericCode}>
+      {country.name}
+      <button onClick={() => showAndHide(index)}>show</button>
+    </p>
+  )
+
+  if (show[index] === true) {
+    return [resultTitle ,
+    <Country country={country} />]
+  }
+  return (
+    resultTitle
+  )
+}
+
 const Country = ({country}) => {
   return (
     <div>
@@ -23,7 +48,8 @@ const Results = ({countries, filter}) => {
   } else if (results.length > 1) {
     return (
       <div>
-       {results.map(country => <p key={country.numericCode}>{country.name}</p>)}
+       {results.map((country, index) => 
+         <ResultCountry country={country} index={index} key={country.numericCode}/>)}
       </div>
     )
   } else if (results.length === 1) {
@@ -38,6 +64,7 @@ const Results = ({countries, filter}) => {
   }
 
 function App() {
+  console.log('app')
   const [countries, setCountries] = useState([])
   const [filter, setFilter] = useState('')
 
@@ -47,8 +74,7 @@ function App() {
       .then(response => {
         setCountries(response.data)
       })
-
-  })
+  }, [])
 
   const handleFilterChange = (event) => {
     setFilter(event.target.value)
