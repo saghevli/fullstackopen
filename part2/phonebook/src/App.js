@@ -1,5 +1,6 @@
 import axios from 'axios'
 import React, { useState, useEffect } from 'react'
+import personService from './services/persons'
 
 const Filter = ({newFilter, handleFilterChange}) => (
   <div>
@@ -58,15 +59,15 @@ const App = () => {
   const addName = (event) => {
     event.preventDefault()
     if (persons.findIndex(person => person.name === newName) === -1) {
-      axios
-        .post('http://localhost:3001/persons', {name: newName, number:newNumber})
-        .then(response => {
-          setPersons(persons.concat(response.data))
+      personService
+        .create({name: newName, number:newNumber})
+        .then(returnedPerson => {
+          setPersons(persons.concat(returnedPerson))
           setNewName('')
           setNewNumber('')
         })
-      }
-      return  
+    }
+    return  
   }
 
   const handleNameChange = (event) => {
