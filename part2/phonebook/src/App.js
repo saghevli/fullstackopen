@@ -62,7 +62,8 @@ const App = () => {
 
   const addName = (event) => {
     event.preventDefault()
-    if (persons.findIndex(person => person.name === newName) === -1) {
+    const foundIndex = persons.findIndex(person => person.name === newName)
+    if (foundIndex === -1) {
       personService
         .create({name: newName, number:newNumber})
         .then(returnedPerson => {
@@ -72,8 +73,20 @@ const App = () => {
         })
         return
     }
-    window.alert(`${newName} is already added to phonebook`)
+    if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+      personService
+        .update(persons[foundIndex].id, {name: newName, number:newNumber})
+        .then(returnedPerson => {
+          setPersons([...persons].map(person => (
+            person.name === newName ?
+              {...person, number: newNumber} :
+              person)))
+          setNewName('')
+          setNewNumber('')
+        })
+    }
   }
+
 
   const handleNameChange = (event) => {
     console.log(event.target.value)
