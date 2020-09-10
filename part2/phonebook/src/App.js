@@ -1,6 +1,7 @@
 import axios from 'axios'
 import React, { useState, useEffect } from 'react'
 import personService from './services/persons'
+import './index.css'
 
 const Filter = ({newFilter, handleFilterChange}) => (
   <div>
@@ -32,7 +33,7 @@ const PersonForm = ({addName, newName, newNumber, handleNameChange, handleNumber
   </form>
 )
 
-const Persons = ({persons, newFilter, deletePersonHandler}) => {
+const Persons = ({persons, newFilter, deletePersonHandler, style}) => {
   return (
     <div>
       {persons
@@ -40,27 +41,18 @@ const Persons = ({persons, newFilter, deletePersonHandler}) => {
         .map((person, index) => 
           <p key={index}>
             {person.name} {person.number}
-            <button onClick={() => deletePersonHandler(index)}>delete</button>
+            <button onClick={() => deletePersonHandler(index, style)}>delete</button>
           </p>)}
     </div>
 )}
 
-const Confirmation = ({message}) => {
-  const notificationStyle = {
-    color: 'green',
-    background: 'lightgrey',
-    fontSize: 20,
-    borderStyle: 'solid',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10
-  }
-  if (message === null) {
+const Notification = ({notification}) => {
+  if (notification.message === null) {
     return null
   }
   return (
-    <div className="confirmation" style={notificationStyle}>
-      {message}
+    <div className={notification.type}>
+      {notification.message}
     </div>
   )
 }
@@ -70,8 +62,10 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [newFilter, setNewFilter] = useState('')
-  const [confirmMessage, setConfirmMessage] = useState(null)
-
+  // better solution would be to tie these into a single piece of state since they change together.
+  // also, no need to pass in a style, we can just pass in a type (or a class name!) and let the
+  // notification component decide
+  const [notificationData, setNotificationData] = useState({message: null, type: null})
   useEffect(() => {
     axios
       .get('http://localhost:3001/persons')
@@ -90,8 +84,8 @@ const App = () => {
           setPersons(persons.concat(returnedPerson))
           setNewName('')
           setNewNumber('')
-          setConfirmMessage(`Added ${returnedPerson.name}`)
-          setTimeout(() => setConfirmMessage(null), 4000)
+          setNotificationData({message:`Added ${returnedPerson.name}`, type:'confirm'})
+          setTimeout(() => setNotificationData({...notificationData, message: null}), 4000)
         })
         return
     }
@@ -105,8 +99,8 @@ const App = () => {
               person)))
           setNewName('')
           setNewNumber('')
-          setConfirmMessage(`Modified ${returnedPerson.name}`)
-          setTimeout(() => setConfirmMessage(null), 4000)
+          setNotificationData({message:`Modified ${returnedPerson.name}`, type:'confirm'})
+          setTimeout(() => setNotificationData({...notificationData, message:null}), 4000)
         })
     }
   }
@@ -134,18 +128,23 @@ const App = () => {
         .then(x => {
           setPersons(persons.filter((person, i) => index !== i))
         })
+        .catch(error => {
+          setNotificationData({message:`Information of ${persons[index].name} has already been removed from the server`, type:'error'})
+          setPersons(persons.filter((person, i) => index !== i))
+          setTimeout(() => setNotificationData({...notificationData, message:null}), 4000)
+        })
     }
   }
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <Confirmation message={confirmMessage}/>
+      <Notification notification={notificationData} />
       <Filter newFilter={newFilter} handleFilterChange={handleFilterChange} />
       <h3>add a new</h3>
       <PersonForm addName={addName} newName={newName} newNumber={newNumber} handleNameChange={handleNameChange} handleNumberChange={handleNumberChange} />
       <h3>Numbers</h3>
-      <Persons persons={persons} newFilter={newFilter} deletePersonHandler={deletePersonHandler}/>
+      <Persons persons={persons} newFilter={newFilter} deletePersonHandler={deletePersonHandler} />
     </div>
   )
 }
