@@ -33,12 +33,16 @@ const PersonForm = ({addName, newName, newNumber, handleNameChange, handleNumber
   </form>
 )
 
-const Persons = ({persons, newFilter}) => {
+const Persons = ({persons, newFilter, deletePersonHandler}) => {
   return (
     <div>
       {persons
         .filter(person => person.name.toLowerCase().includes(newFilter.toLowerCase()))
-        .map((person, index) => <p key={index}>{person.name} {person.number}</p>)}
+        .map((person, index) => 
+          <p key={index}>
+            {person.name} {person.number}
+            <button onClick={() => deletePersonHandler(index)}>delete</button>
+          </p>)}
     </div>
 )}
 
@@ -66,8 +70,9 @@ const App = () => {
           setNewName('')
           setNewNumber('')
         })
+        return
     }
-    return  
+    window.alert(`${newName} is already added to phonebook`)
   }
 
   const handleNameChange = (event) => {
@@ -85,13 +90,23 @@ const App = () => {
     setNewFilter(event.target.value)
   }
 
+  const deletePersonHandler = (index) => {
+    if(window.confirm(`Delete ${persons[index].name}?`)) {
+      personService
+        .remove(persons[index].id)
+        .then(x => {
+          setPersons(persons.filter((person, i) => index !== i))
+        })
+    }
+  }
+
   return (
     <div>
       <Filter newFilter={newFilter} handleFilterChange={handleFilterChange} />
       <h3>add a new</h3>
       <PersonForm addName={addName} newName={newName} newNumber={newNumber} handleNameChange={handleNameChange} handleNumberChange={handleNumberChange} />
       <h3>Numbers</h3>
-      <Persons persons={persons} newFilter={newFilter} />
+      <Persons persons={persons} newFilter={newFilter} deletePersonHandler={deletePersonHandler}/>
     </div>
   )
 }
