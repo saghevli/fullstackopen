@@ -4,7 +4,6 @@ import personService from './services/persons'
 
 const Filter = ({newFilter, handleFilterChange}) => (
   <div>
-    <h2>Phonebook</h2>
     filter shown with<input
       value={newFilter}
       onChange={handleFilterChange} 
@@ -46,11 +45,32 @@ const Persons = ({persons, newFilter, deletePersonHandler}) => {
     </div>
 )}
 
+const Confirmation = ({message}) => {
+  const notificationStyle = {
+    color: 'green',
+    background: 'lightgrey',
+    fontSize: 20,
+    borderStyle: 'solid',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10
+  }
+  if (message === null) {
+    return null
+  }
+  return (
+    <div className="confirmation" style={notificationStyle}>
+      {message}
+    </div>
+  )
+}
+
 const App = () => {
   const [persons, setPersons] = useState([]) 
-  const [ newName, setNewName ] = useState('')
-  const [ newNumber, setNewNumber ] = useState('')
-  const [ newFilter, setNewFilter ] = useState('')
+  const [newName, setNewName] = useState('')
+  const [newNumber, setNewNumber] = useState('')
+  const [newFilter, setNewFilter] = useState('')
+  const [confirmMessage, setConfirmMessage] = useState(null)
 
   useEffect(() => {
     axios
@@ -70,6 +90,8 @@ const App = () => {
           setPersons(persons.concat(returnedPerson))
           setNewName('')
           setNewNumber('')
+          setConfirmMessage(`Added ${returnedPerson.name}`)
+          setTimeout(() => setConfirmMessage(null), 4000)
         })
         return
     }
@@ -83,6 +105,8 @@ const App = () => {
               person)))
           setNewName('')
           setNewNumber('')
+          setConfirmMessage(`Modified ${returnedPerson.name}`)
+          setTimeout(() => setConfirmMessage(null), 4000)
         })
     }
   }
@@ -115,6 +139,8 @@ const App = () => {
 
   return (
     <div>
+      <h2>Phonebook</h2>
+      <Confirmation message={confirmMessage}/>
       <Filter newFilter={newFilter} handleFilterChange={handleFilterChange} />
       <h3>add a new</h3>
       <PersonForm addName={addName} newName={newName} newNumber={newNumber} handleNameChange={handleNameChange} handleNumberChange={handleNumberChange} />
