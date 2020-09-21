@@ -62,13 +62,10 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [newFilter, setNewFilter] = useState('')
-  // better solution would be to tie these into a single piece of state since they change together.
-  // also, no need to pass in a style, we can just pass in a type (or a class name!) and let the
-  // notification component decide
   const [notificationData, setNotificationData] = useState({message: null, type: null})
   useEffect(() => {
     axios
-      .get('http://localhost:3001/persons')
+      .get('/api/persons')
       .then(response => {
         setPersons(response.data)
     })
